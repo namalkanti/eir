@@ -34,6 +34,8 @@ let
 
     # Editor / terminal / file manager configs
     cp -rL ${dotfiles}/.config/wezterm         $out/wezterm
+    chmod u+w $out/wezterm
+    sed -i "s/MesloLGS NF/MesloLGS Nerd Font/g" $out/wezterm/wezterm.lua
     cp -rL ${dotfiles}/.config/lf              $out/lf
 
     # tmux-powerline: config + bubble theme
@@ -138,6 +140,12 @@ in
 
   programs.neovim.defaultEditor = true;
 
+  # Fonts — MesloLGS NF required by wezterm config and powerlevel10k
+  fonts.enableDefaultPackages = true;
+  fonts.packages = with pkgs; [
+    nerd-fonts.meslo-lg
+  ];
+
   # Default browser for xdg-open
   xdg.mime.defaultApplications = {
     "text/html" = "firefox.desktop";
@@ -166,21 +174,35 @@ in
     desktopManager.xfce.enable = true;
   };
 
-  # Dotfiles — baked into ISO at build time (symlinks resolved, configs patched)
-  isoImage.contents = [
-    { source = "${resolvedDotfiles}/.zshrc";         target = "/home/eir/.zshrc"; }
-    { source = "${resolvedDotfiles}/.bashrc";        target = "/home/eir/.bashrc"; }
-    { source = "${resolvedDotfiles}/.bash_aliases";  target = "/home/eir/.bash_aliases"; }
-    { source = "${resolvedDotfiles}/.p10k.zsh";      target = "/home/eir/.p10k.zsh"; }
-    { source = "${resolvedDotfiles}/.tmux.conf";     target = "/home/eir/.tmux.conf"; }
-    { source = "${resolvedDotfiles}/.vimrc";         target = "/home/eir/.vimrc"; }
-    { source = "${resolvedDotfiles}/.vim";           target = "/home/eir/.vim"; }
-    { source = "${resolvedDotfiles}/.claude";        target = "/home/eir/.claude"; }
-    { source = "${resolvedDotfiles}/wezterm";        target = "/home/eir/.config/wezterm"; }
-    { source = "${resolvedDotfiles}/lf";             target = "/home/eir/.config/lf"; }
-    { source = "${resolvedDotfiles}/tmux-powerline-config";  target = "/home/eir/.config/tmux-powerline"; }
-    { source = "${resolvedDotfiles}/tmux-powerline-themes";  target = "/home/eir/.config/tmux-powerline/themes"; }
-  ];
+  # Populate /home/eir from the nix store at activation time (before login)
+  system.activationScripts.eir-dotfiles = {
+    deps = [ "users" ];
+    text = ''
+      dst="/home/eir"
+      mkdir -p \
+        "$dst/.vim" \
+        "$dst/.claude" \
+        "$dst/.config/wezterm" \
+        "$dst/.config/lf" \
+        "$dst/.config/tmux-powerline/themes"
+
+      cp -rT --no-preserve=ownership ${resolvedDotfiles}/.vim    "$dst/.vim"    || true
+      cp -rT --no-preserve=ownership ${resolvedDotfiles}/.claude "$dst/.claude" || true
+      cp -rT --no-preserve=ownership ${resolvedDotfiles}/wezterm "$dst/.config/wezterm" || true
+      cp -rT --no-preserve=ownership ${resolvedDotfiles}/lf      "$dst/.config/lf"      || true
+      cp -rT --no-preserve=ownership ${resolvedDotfiles}/tmux-powerline-config  "$dst/.config/tmux-powerline"        || true
+      cp -rT --no-preserve=ownership ${resolvedDotfiles}/tmux-powerline-themes  "$dst/.config/tmux-powerline/themes" || true
+
+      cp ${resolvedDotfiles}/.zshrc        "$dst/.zshrc"        || true
+      cp ${resolvedDotfiles}/.bashrc       "$dst/.bashrc"       || true
+      cp ${resolvedDotfiles}/.bash_aliases "$dst/.bash_aliases" || true
+      cp ${resolvedDotfiles}/.p10k.zsh     "$dst/.p10k.zsh"     || true
+      cp ${resolvedDotfiles}/.tmux.conf    "$dst/.tmux.conf"    || true
+      cp ${resolvedDotfiles}/.vimrc        "$dst/.vimrc"        || true
+
+      chown -R eir:users "$dst" || true
+    '';
+  };
 
   # Provision default XFCE window manager shortcuts (xfwm4)
   environment.etc."xfce4/xfconf/xfce-perchannel-xml/xfwm4.xml".text = ''
