@@ -34,6 +34,12 @@ in
   # Hardware / Firmware support (all non-free blobs for max wifi/network compatibility)
   hardware.enableAllFirmware = true;
 
+  # SSH — password auth, useful for headless recovery scenarios
+  services.openssh = {
+    enable = true;
+    settings.PasswordAuthentication = true;
+  };
+
   # NetworkManager configuration
   networking.hostName = "eir-recovery";
   networking.networkmanager.enable = true;
@@ -47,7 +53,7 @@ in
   users.users.eir = {
     isNormalUser = true;
     extraGroups = [ "wheel" "networkmanager" "video" ];
-    initialPassword = "eir";
+    initialPassword = "eiR1!";
   };
 
   services.displayManager.autoLogin = {
