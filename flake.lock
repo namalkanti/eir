@@ -1,5 +1,21 @@
 {
   "nodes": {
+    "dotfiles": {
+      "flake": false,
+      "locked": {
+        "lastModified": 1785607147,
+        "narHash": "sha256-90Mnj4WTAXHTriY6zHPZQX/3kUyzn/6zvDHeMflw2Js=",
+        "owner": "namalkanti",
+        "repo": "dotfiles",
+        "rev": "0aa0120616565ff3fc2ec5a1e237f5b50f28e5dd",
+        "type": "github"
+      },
+      "original": {
+        "owner": "namalkanti",
+        "repo": "dotfiles",
+        "type": "github"
+      }
+    },
     "nixpkgs": {
       "locked": {
         "lastModified": 1785104993,
@@ -18,6 +34,7 @@
     },
     "root": {
       "inputs": {
+        "dotfiles": "dotfiles",
         "nixpkgs": "nixpkgs"
       }
     }
