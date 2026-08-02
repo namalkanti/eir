@@ -7,6 +7,21 @@ let
     ln -s ${pkgs.zsh-powerlevel10k}/share/zsh/themes/powerlevel10k $out/themes/powerlevel10k
   '';
 
+  # Power menu launcher using Rofi
+  rofiPowerMenu = pkgs.writeShellApplication {
+    name = "rofi-power-menu";
+    runtimeInputs = with pkgs; [ rofi systemd i3 ];
+    text = ''
+      chosen=$(printf "Shutdown\nReboot\nSuspend\nExit i3" | rofi -dmenu -i -p "Power")
+      case "$chosen" in
+        Shutdown) systemctl poweroff ;;
+        Reboot) systemctl reboot ;;
+        Suspend) systemctl suspend ;;
+        "Exit i3") i3-msg exit ;;
+      esac
+    '';
+  };
+
   # Resolve symlinks + process dotfiles for the ISO
   resolvedDotfiles = pkgs.runCommand "dotfiles-resolved" {} ''
     mkdir -p $out
@@ -44,6 +59,238 @@ let
     chmod u+w $out/.claude
     cp -rL ${dotfiles}/.pi/agent/AGENTS.md $out/.claude/AGENTS.md
     echo '@~/.claude/AGENTS.md' > $out/.claude/CLAUDE.md
+  '';
+
+  nixWallpaper = pkgs.nixos-artwork.wallpapers.nineish-dark-gray.gnomeFilePath;
+
+  i3Config = ''
+    font pango:MesloLGS Nerd Font 10
+    floating_modifier Mod1
+
+    # WASD focus (Alt + w/a/s/d)
+    bindsym Mod1+a focus left
+    bindsym Mod1+s focus down
+    bindsym Mod1+w focus up
+    bindsym Mod1+d focus right
+
+    # WASD move (Shift + Alt + w/a/s/d)
+    bindsym Shift+Mod1+a move left
+    bindsym Shift+Mod1+s move down
+    bindsym Shift+Mod1+w move up
+    bindsym Shift+Mod1+d move right
+
+    # Cycle focus (Alt + Tab / Shift + Alt + Tab)
+    bindsym Mod1+Tab focus next
+    bindsym Shift+Mod1+Tab focus prev
+
+    # Workspaces
+    bindsym Mod1+1 workspace number 1
+    bindsym Mod1+2 workspace number 2
+    bindsym Mod1+3 workspace number 3
+    bindsym Mod1+4 workspace number 4
+
+    # Move container to workspace
+    bindsym Shift+Mod1+1 move container to workspace number 1
+    bindsym Shift+Mod1+2 move container to workspace number 2
+    bindsym Shift+Mod1+3 move container to workspace number 3
+    bindsym Shift+Mod1+4 move container to workspace number 4
+
+    # Application launches
+    bindsym Shift+Mod1+t exec wezterm
+    bindsym Shift+Mod1+f exec thunar
+    bindsym Mod1+q exec "rofi -show drun"
+    bindsym Mod1+e exec "rofi -show window"
+    bindsym Shift+Mod1+e exec rofi-power-menu
+
+    # Close window (Super + X or Shift + Alt + X)
+    bindsym Mod4+x kill
+    bindsym Shift+Mod1+x kill
+    bindsym Shift+Mod1+c kill
+    bindsym Shift+Mod1+r restart
+
+    # Aesthetics & gaps
+    gaps inner 8
+    gaps outer 4
+    default_border pixel 2
+    default_floating_border pixel 2
+
+    client.focused          #ea6847 #070f1c #e0d9c7 #ea6847 #ea6847
+    client.focused_inactive #24273a #070f1c #8caaee #24273a #24273a
+    client.unfocused        #1e1e2e #070f1c #a6adc8 #1e1e2e #1e1e2e
+    client.urgent           #e78284 #070f1c #e0d9c7 #e78284 #e78284
+
+    # Autostart
+    exec_always --no-startup-id "pkill polybar; polybar main &"
+    exec --no-startup-id picom
+    exec --no-startup-id nm-applet
+    exec --no-startup-id ${pkgs.feh}/bin/feh --bg-fill ${nixWallpaper}
+  '';
+
+  polybarConfig = ''
+    [colors]
+    background = #070f1c
+    background-alt = #1e1e2e
+    foreground = #e0d9c7
+    primary = #ea6847
+    secondary = #5db2f8
+    alert = #e78284
+    disabled = #6c7086
+
+    [bar/main]
+    width = 100%
+    height = 24pt
+    radius = 0
+
+    background = ''${colors.background}
+    foreground = ''${colors.foreground}
+
+    line-size = 2pt
+    border-size = 0pt
+
+    padding-left = 1
+    padding-right = 1
+
+    module-margin = 1
+
+    font-0 = "MesloLGS Nerd Font:size=10;2"
+
+    modules-left = xworkspaces
+    modules-center = date
+    modules-right = memory cpu disk wlan battery powermenu tray
+
+    cursor-click = pointer
+    cursor-scroll = ns-resize
+
+    enable-ipc = true
+
+    [module/xworkspaces]
+    type = internal/xworkspaces
+
+    label-active = " %name% "
+    label-active-background = ''${colors.primary}
+    label-active-foreground = #070f1c
+    label-active-padding = 0
+
+    label-occupied = " %name% "
+    label-occupied-background = ''${colors.background-alt}
+    label-occupied-foreground = ''${colors.foreground}
+    label-occupied-padding = 0
+
+    label-urgent = " %name% "
+    label-urgent-background = ''${colors.alert}
+    label-urgent-padding = 0
+
+    label-empty = " %name% "
+    label-empty-foreground = ''${colors.disabled}
+    label-empty-padding = 0
+
+    [module/date]
+    type = internal/date
+    interval = 1
+    date = %Y-%m-%d %I:%M %p
+    label = %date%
+    label-foreground = ''${colors.foreground}
+
+    [module/cpu]
+    type = internal/cpu
+    interval = 2
+    format-prefix = "CPU "
+    format-prefix-foreground = ''${colors.secondary}
+    label = %percentage%%
+
+    [module/memory]
+    type = internal/memory
+    interval = 2
+    format-prefix = "RAM "
+    format-prefix-foreground = ''${colors.secondary}
+    label = %percentage_used:2%%
+
+    [module/disk]
+    type = internal/fs
+    interval = 25
+    mount-0 = /
+    label-mounted = %{F#5db2f8}/%{F-} %percentage_used%%
+
+    [module/wlan]
+    type = internal/network
+    interface-type = wireless
+    interval = 3.0
+    format-connected = <label-connected>
+    format-disconnected = <label-disconnected>
+    label-connected = %{F#ea6847}WiFi%{F-} %essid% %local_ip%
+    label-disconnected = %{F#6c7086}offline%{F-}
+
+    [module/battery]
+    type = internal/battery
+    full-at = 99
+    low-at = 10
+    battery = BAT0
+    adapter = ADP1
+    poll-interval = 5
+
+    [module/powermenu]
+    type = custom/text
+    label = " ⏻ "
+    label-foreground = ''${colors.primary}
+    click-left = rofi-power-menu
+
+    [module/tray]
+    type = internal/tray
+    tray-size = 80%
+    tray-spacing = 4px
+  '';
+
+  rofiConfig = ''
+    configuration {
+        modi: "drun,run,window";
+        font: "MesloLGS Nerd Font 10";
+        show-icons: true;
+        terminal: "wezterm";
+        drun-display-format: "{name}";
+    }
+
+    @theme "/dev/null"
+
+    * {
+        bg: #070f1c;
+        bg-alt: #1e1e2e;
+        fg: #e0d9c7;
+        accent: #ea6847;
+
+        background-color: @bg;
+        text-color: @fg;
+        border: 0;
+        margin: 0;
+        padding: 0;
+        spacing: 0;
+    }
+
+    window {
+        width: 30%;
+        border: 2;
+        border-color: @accent;
+        background-color: @bg;
+        padding: 10;
+    }
+
+    element {
+        padding: 6 8;
+        text-color: @fg;
+    }
+
+    element selected {
+        background-color: @bg-alt;
+        text-color: @accent;
+    }
+
+    entry {
+        padding: 8;
+        text-color: @fg;
+    }
+
+    inputbar {
+        children: [entry];
+    }
   '';
 in
 
@@ -116,6 +363,13 @@ in
     fzf
     ripgrep
     git
+    i3
+    polybar
+    rofi
+    picom
+    feh
+    rofiPowerMenu
+    thunar
     (neovim.override {
       configure = {
         packages.eir.start = with vimPlugins; [
@@ -168,15 +422,15 @@ in
     user = "eir";
   };
 
-  # Keyboard configuration (swap Caps Lock and Escape)
+  # Window Manager configuration
   services.xserver = {
     enable = true;
     xkb.layout = "us";
     xkb.options = "caps:swapescape";
-    desktopManager.xfce.enable = true;
+    windowManager.i3.enable = true;
   };
 
-  # Populate /home/eir from the nix store at activation time (before login)
+  # Populate /home/eir from nix store / inline strings at activation time
   system.activationScripts.eir-dotfiles = {
     deps = [ "users" ];
     text = ''
@@ -185,7 +439,10 @@ in
         "$dst/.vim" \
         "$dst/.claude" \
         "$dst/.config/wezterm" \
-        "$dst/.config/lf"
+        "$dst/.config/lf" \
+        "$dst/.config/i3" \
+        "$dst/.config/polybar" \
+        "$dst/.config/rofi"
 
       cp -rT --no-preserve=ownership ${resolvedDotfiles}/.vim    "$dst/.vim"    || true
       cp -rT --no-preserve=ownership ${resolvedDotfiles}/.claude "$dst/.claude" || true
@@ -199,48 +456,19 @@ in
       cp ${resolvedDotfiles}/.tmux.conf    "$dst/.tmux.conf"    || true
       cp ${resolvedDotfiles}/.vimrc        "$dst/.vimrc"        || true
 
+      cat << 'EOF' > "$dst/.config/i3/config"
+${i3Config}
+EOF
+
+      cat << 'EOF' > "$dst/.config/polybar/config.ini"
+${polybarConfig}
+EOF
+
+      cat << 'EOF' > "$dst/.config/rofi/config.rasi"
+${rofiConfig}
+EOF
+
       chown -R eir:users "$dst" || true
     '';
   };
-
-  # Provision default XFCE window manager shortcuts (xfwm4)
-  environment.etc."xfce4/xfconf/xfce-perchannel-xml/xfwm4.xml".text = ''
-    <?xml version="1.0" encoding="UTF-8"?>
-    <channel name="xfce4" version="1.0">
-      <properties name="defaults">
-        <property name="general" type="empty">
-          <property name="tile_up_key" type="string" value="&lt;Shift&gt;&lt;Alt&gt;w"/>
-          <property name="tile_left_key" type="string" value="&lt;Shift&gt;&lt;Alt&gt;a"/>
-          <property name="tile_down_key" type="string" value="&lt;Shift&gt;&lt;Alt&gt;d"/>
-          <property name="tile_right_key" type="string" value="&lt;Shift&gt;&lt;Alt&gt;s"/>
-          <property name="maximize_window_key" type="string" value="&lt;Alt&gt;r"/>
-          <property name="workspace_1_key" type="string" value="&lt;Alt&gt;1"/>
-          <property name="workspace_2_key" type="string" value="&lt;Alt&gt;2"/>
-          <property name="workspace_3_key" type="string" value="&lt;Alt&gt;3"/>
-          <property name="workspace_4_key" type="string" value="&lt;Alt&gt;4"/>
-        </property>
-      </properties>
-    </channel>
-  '';
-
-  # Set wezterm as the default terminal emulator in XFCE
-  environment.etc."xdg/xfce4/helpers.rc".text = ''
-    TerminalEmulator=wezterm
-    TerminalEmulatorDismissed=true
-    WebBrowser=firefox
-    WebBrowserDismissed=true
-  '';
-
-  # Provision general keyboard shortcuts (Terminal / File Manager)
-  environment.etc."xfce4/xfconf/xfce-perchannel-xml/xfce4-keyboard-shortcuts.xml".text = ''
-    <?xml version="1.0" encoding="UTF-8"?>
-    <channel name="xfce4-keyboard-shortcuts" version="1.0">
-      <properties name="commands" type="empty">
-        <property name="custom" type="empty">
-          <property name="&lt;Shift&gt;&lt;Alt&gt;t" type="string" value="wezterm"/>
-          <property name="&lt;Shift&gt;&lt;Alt&gt;f" type="string" value="thunar"/>
-        </property>
-      </properties>
-    </channel>
-  '';
 }
