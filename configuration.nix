@@ -21,10 +21,11 @@ let
     sed -i '/^export ZSH=/d'                $out/.zshrc
     sed -i '/^source \$ZSH\/oh-my-zsh.sh/d' $out/.zshrc
 
-    # tmux — strip tpm plugin declarations and run line; NixOS manages plugins
+    # tmux — strip tpm plugin declarations, run line, and default-shell; NixOS manages plugins and shell
     cp -rL ${dotfiles}/.tmux.conf $out/.tmux.conf
     sed -i '/set -g @plugin/d'                         $out/.tmux.conf
     sed -i "/run '~\/.tmux\/plugins\/tpm\/tpm'/d"      $out/.tmux.conf
+    sed -i '/set-option -g default-shell/d'            $out/.tmux.conf
 
     # neovim — strip vim-plug block and patch fzf path; NixOS manages plugins
     cp -rL ${dotfiles}/.vimrc $out/.vimrc
@@ -37,12 +38,6 @@ let
     chmod u+w $out/wezterm
     sed -i "s/MesloLGS NF/MesloLGS Nerd Font/g" $out/wezterm/wezterm.lua
     cp -rL ${dotfiles}/.config/lf              $out/lf
-
-    # tmux-powerline: config + bubble theme
-    cp -rL ${dotfiles}/.config/tmux-powerline  $out/tmux-powerline-config
-    mkdir -p $out/tmux-powerline-themes
-    cp -rL ${dotfiles}/.tmux/plugins/tmux-powerline/themes/bubble.sh \
-           $out/tmux-powerline-themes/bubble.sh
 
     # Claude — resolve symlinks, inject AGENTS.md, fix CLAUDE.md reference
     cp -rL ${dotfiles}/.claude       $out/.claude
@@ -102,8 +97,14 @@ in
     enable = true;
     plugins = with pkgs.tmuxPlugins; [
       open
-      tmux-powerline
     ];
+    extraConfig = ''
+      set -g status-style "bg=#24273A,fg=#c6d0f5"
+      set -g status-left "#[fg=#24273A,bg=#8caaee,bold] #S #[default] "
+      set -g status-right "#[fg=#ca9ee6,bg=#303446] #{s|^$HOME|~|:pane_current_path} "
+      set -g window-status-current-format "#[fg=#24273A,bg=#8caaee,bold] #I:#W "
+      set -g window-status-format "#[fg=#c6d0f5,bg=#24273A] #I:#W "
+    '';
   };
 
   # System packages
@@ -141,6 +142,7 @@ in
   programs.neovim.defaultEditor = true;
 
   # Fonts — MesloLGS NF required by wezterm config and powerlevel10k
+  fonts.fontconfig.enable = true;
   fonts.enableDefaultPackages = true;
   fonts.packages = with pkgs; [
     nerd-fonts.meslo-lg
@@ -183,15 +185,12 @@ in
         "$dst/.vim" \
         "$dst/.claude" \
         "$dst/.config/wezterm" \
-        "$dst/.config/lf" \
-        "$dst/.config/tmux-powerline/themes"
+        "$dst/.config/lf"
 
       cp -rT --no-preserve=ownership ${resolvedDotfiles}/.vim    "$dst/.vim"    || true
       cp -rT --no-preserve=ownership ${resolvedDotfiles}/.claude "$dst/.claude" || true
       cp -rT --no-preserve=ownership ${resolvedDotfiles}/wezterm "$dst/.config/wezterm" || true
       cp -rT --no-preserve=ownership ${resolvedDotfiles}/lf      "$dst/.config/lf"      || true
-      cp -rT --no-preserve=ownership ${resolvedDotfiles}/tmux-powerline-config  "$dst/.config/tmux-powerline"        || true
-      cp -rT --no-preserve=ownership ${resolvedDotfiles}/tmux-powerline-themes  "$dst/.config/tmux-powerline/themes" || true
 
       cp ${resolvedDotfiles}/.zshrc        "$dst/.zshrc"        || true
       cp ${resolvedDotfiles}/.bashrc       "$dst/.bashrc"       || true
