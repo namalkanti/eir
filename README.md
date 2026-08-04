@@ -154,7 +154,9 @@ When the USB boots, `eir-persistence.service` automatically runs before user log
 
 ---
 
-## Technical Concept Notes
+## Official Documentation & References
 
-For a detailed conceptual breakdown of Nix primitives (Derivations, Nix Store, Flakes, Module System, and Image Building), see:
-[Nix Foundations Reference](.pi/notes.local/nix-foundations-reference.md)
+For deeper technical reference on NixOS, flakes, and ISO generation:
+- [NixOS Manual (26.05)](https://nixos.org/manual/nixos/stable/)
+- [Nix Reference Manual](https://nixos.org/manual/nix/stable/)
+- [Building Bootable ISO Images (nix.dev)](https://nix.dev/tutorials/nixos/building-bootable-iso-image.html)
