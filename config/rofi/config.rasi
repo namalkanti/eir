@@ -1,0 +1,50 @@
+configuration {
+    modi: "drun,run,window";
+    font: "MesloLGS Nerd Font 10";
+    show-icons: true;
+    terminal: "wezterm";
+    drun-display-format: "{name}";
+}
+
+@theme "/dev/null"
+
+* {
+    bg: #070f1c;
+    bg-alt: #1e1e2e;
+    fg: #e0d9c7;
+    accent: #ea6847;
+
+    background-color: @bg;
+    text-color: @fg;
+    border: 0;
+    margin: 0;
+    padding: 0;
+    spacing: 0;
+}
+
+window {
+    width: 30%;
+    border: 2;
+    border-color: @accent;
+    background-color: @bg;
+    padding: 10;
+}
+
+element {
+    padding: 6 8;
+    text-color: @fg;
+}
+
+element selected {
+    background-color: @bg-alt;
+    text-color: @accent;
+}
+
+entry {
+    padding: 8;
+    text-color: @fg;
+}
+
+inputbar {
+    children: [entry];
+}

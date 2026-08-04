@@ -1,0 +1,60 @@
+font pango:MesloLGS Nerd Font 10
+floating_modifier Mod1
+
+# WASD focus (Alt + w/a/s/d)
+bindsym Mod1+a focus left
+bindsym Mod1+s focus down
+bindsym Mod1+w focus up
+bindsym Mod1+d focus right
+
+# WASD move (Shift + Alt + w/a/s/d)
+bindsym Shift+Mod1+a move left
+bindsym Shift+Mod1+s move down
+bindsym Shift+Mod1+w move up
+bindsym Shift+Mod1+d move right
+
+# Cycle focus (Alt + Tab / Shift + Alt + Tab)
+bindsym Mod1+Tab focus next
+bindsym Shift+Mod1+Tab focus prev
+
+# Workspaces
+bindsym Mod1+1 workspace number 1
+bindsym Mod1+2 workspace number 2
+bindsym Mod1+3 workspace number 3
+bindsym Mod1+4 workspace number 4
+
+# Move container to workspace
+bindsym Shift+Mod1+1 move container to workspace number 1
+bindsym Shift+Mod1+2 move container to workspace number 2
+bindsym Shift+Mod1+3 move container to workspace number 3
+bindsym Shift+Mod1+4 move container to workspace number 4
+
+# Application launches
+bindsym Shift+Mod1+t exec wezterm
+bindsym Shift+Mod1+f exec thunar
+bindsym Mod1+q exec "rofi -show drun"
+bindsym Mod1+e exec "rofi -show window"
+bindsym Shift+Mod1+e exec rofi-power-menu
+
+# Close window (Super + X or Shift + Alt + X)
+bindsym Mod4+x kill
+bindsym Shift+Mod1+x kill
+bindsym Shift+Mod1+c kill
+bindsym Shift+Mod1+r restart
+
+# Aesthetics & gaps
+gaps inner 8
+gaps outer 4
+default_border pixel 2
+default_floating_border pixel 2
+
+client.focused          #ea6847 #070f1c #e0d9c7 #ea6847 #ea6847
+client.focused_inactive #24273a #070f1c #8caaee #24273a #24273a
+client.unfocused        #1e1e2e #070f1c #a6adc8 #1e1e2e #1e1e2e
+client.urgent           #e78284 #070f1c #e0d9c7 #e78284 #e78284
+
+# Autostart
+exec_always --no-startup-id "pkill polybar; polybar main &"
+exec --no-startup-id picom
+exec --no-startup-id nm-applet
+exec --no-startup-id @feh@/bin/feh --bg-fill @nixWallpaper@
