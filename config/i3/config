@@ -1,17 +1,17 @@
 font pango:MesloLGS Nerd Font 10
 floating_modifier Mod1
 
-# WASD focus (Alt + w/a/s/d)
-bindsym Mod1+a focus left
-bindsym Mod1+s focus down
-bindsym Mod1+w focus up
-bindsym Mod1+d focus right
+# HJKL focus (Alt + h/j/k/l)
+bindsym Mod1+h focus left
+bindsym Mod1+j focus down
+bindsym Mod1+k focus up
+bindsym Mod1+l focus right
 
-# WASD move (Shift + Alt + w/a/s/d)
-bindsym Shift+Mod1+a move left
-bindsym Shift+Mod1+s move down
-bindsym Shift+Mod1+w move up
-bindsym Shift+Mod1+d move right
+# HJKL move (Shift + Alt + h/j/k/l)
+bindsym Shift+Mod1+h move left
+bindsym Shift+Mod1+j move down
+bindsym Shift+Mod1+k move up
+bindsym Shift+Mod1+l move right
 
 # Cycle focus (Alt + Tab / Shift + Alt + Tab)
 bindsym Mod1+Tab focus next
@@ -31,7 +31,7 @@ bindsym Shift+Mod1+4 move container to workspace number 4
 
 # Application launches
 bindsym Shift+Mod1+t exec wezterm
-bindsym Shift+Mod1+f exec thunar
+bindsym Shift+Mod1+n exec thunar
 bindsym Mod1+q exec "rofi -show drun"
 bindsym Mod1+e exec "rofi -show window"
 bindsym Shift+Mod1+e exec rofi-power-menu
