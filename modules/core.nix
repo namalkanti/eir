@@ -14,6 +14,19 @@
   # Hardware / Firmware support
   hardware.enableAllFirmware = true;
 
+  # Power Management (TLP detects laptop vs desktop dynamically)
+  powerManagement.enable = true;
+  services.tlp.enable = true;
+
+  # PipeWire Audio
+  security.rtkit.enable = true;
+  services.pipewire = {
+    enable = true;
+    alsa.enable = true;
+    alsa.support32Bit = true;
+    pulse.enable = true;
+  };
+
   # SSH — password auth for recovery scenarios
   services.openssh = {
     enable = true;

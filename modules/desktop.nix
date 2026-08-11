@@ -60,6 +60,12 @@ in
     feh
     rofiPowerMenu
     thunar
+    brightnessctl
+    pavucontrol
+    dunst
+    i3lock
+    fastfetch
+    papirus-icon-theme
   ];
 
   # Systemd service to sync /etc/skel into /home/eir before display manager starts

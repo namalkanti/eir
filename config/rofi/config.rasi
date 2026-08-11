@@ -2,6 +2,7 @@ configuration {
     modi: "drun,run,window";
     font: "MesloLGS Nerd Font 10";
     show-icons: true;
+    icon-theme: "Papirus";
     terminal: "wezterm";
     drun-display-format: "{name}";
 }

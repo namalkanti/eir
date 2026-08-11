@@ -1,48 +1,88 @@
 font pango:MesloLGS Nerd Font 10
 floating_modifier Mod1
 
-# HJKL focus (Alt + h/j/k/l)
+# Navigation — HJKL Focus (Alt + h/j/k/l)
 bindsym Mod1+h focus left
 bindsym Mod1+j focus down
 bindsym Mod1+k focus up
 bindsym Mod1+l focus right
 
-# HJKL move (Shift + Alt + h/j/k/l)
+# Navigation — HJKL Move (Shift + Alt + h/j/k/l)
 bindsym Shift+Mod1+h move left
 bindsym Shift+Mod1+j move down
 bindsym Shift+Mod1+k move up
 bindsym Shift+Mod1+l move right
 
-# Cycle focus (Alt + Tab / Shift + Alt + Tab)
+# Navigation — Focus Cycle (Alt + Tab / Shift + Alt + Tab)
 bindsym Mod1+Tab focus next
 bindsym Shift+Mod1+Tab focus prev
 
-# Workspaces
+# Workspaces (Alt + 1..4)
 bindsym Mod1+1 workspace number 1
 bindsym Mod1+2 workspace number 2
 bindsym Mod1+3 workspace number 3
 bindsym Mod1+4 workspace number 4
 
-# Move container to workspace
+# Container Management — Move to Workspace (Shift + Alt + 1..4)
 bindsym Shift+Mod1+1 move container to workspace number 1
 bindsym Shift+Mod1+2 move container to workspace number 2
 bindsym Shift+Mod1+3 move container to workspace number 3
 bindsym Shift+Mod1+4 move container to workspace number 4
 
-# Application launches
+# Window Controls
+bindsym Mod4+x kill
+bindsym Shift+Mod1+x kill
+bindsym Mod1+f fullscreen toggle
+bindsym Shift+Mod1+f floating toggle
+
+# Layouts & Orientation
+bindsym Mod1+b split h
+bindsym Mod1+v split v
+bindsym Mod1+s layout stacking
+bindsym Mod1+w layout tabbed
+bindsym Mod1+a layout toggle split
+
+# Scratchpad
+bindsym Shift+Mod1+minus move scratchpad
+bindsym Mod1+minus scratchpad show
+
+# Resize Mode
+mode "resize" {
+    bindsym h resize shrink width 10 px or 10 ppt
+    bindsym j resize grow height 10 px or 10 ppt
+    bindsym k resize shrink height 10 px or 10 ppt
+    bindsym l resize grow width 10 px or 10 ppt
+
+    bindsym Return mode "default"
+    bindsym Escape mode "default"
+}
+bindsym Mod1+r mode "resize"
+
+# Application Launchers
 bindsym Shift+Mod1+t exec wezterm
 bindsym Shift+Mod1+n exec thunar
 bindsym Mod1+q exec "rofi -show drun"
 bindsym Mod1+e exec "rofi -show window"
 bindsym Shift+Mod1+e exec rofi-power-menu
 
-# Close window (Super + X or Shift + Alt + X)
-bindsym Mod4+x kill
-bindsym Shift+Mod1+x kill
-bindsym Shift+Mod1+c kill
+# Session & i3 Management
+bindsym Ctrl+Mod1+l exec i3lock -c 000000
+bindsym Shift+Mod1+c reload
 bindsym Shift+Mod1+r restart
 
-# Aesthetics & gaps
+# Hardware Media & Brightness Controls
+bindsym XF86AudioRaiseVolume exec --no-startup-id pactl set-sink-volume @DEFAULT_SINK@ +5%
+bindsym XF86AudioLowerVolume exec --no-startup-id pactl set-sink-volume @DEFAULT_SINK@ -5%
+bindsym XF86AudioMute exec --no-startup-id pactl set-sink-mute @DEFAULT_SINK@ toggle
+bindsym XF86MonBrightnessUp exec --no-startup-id brightnessctl set +10%
+bindsym XF86MonBrightnessDown exec --no-startup-id brightnessctl set 10%-
+
+# Floating Window Rules
+for_window [class="Pavucontrol"] floating enable
+for_window [window_role="pop-up"] floating enable
+for_window [window_role="task_dialog"] floating enable
+
+# Aesthetics & Gaps
 gaps inner 8
 gaps outer 4
 default_border pixel 2
@@ -53,8 +93,9 @@ client.focused_inactive #24273a #070f1c #8caaee #24273a #24273a
 client.unfocused        #1e1e2e #070f1c #a6adc8 #1e1e2e #1e1e2e
 client.urgent           #e78284 #070f1c #e0d9c7 #e78284 #e78284
 
-# Autostart
+# Autostart Services
 exec_always --no-startup-id "pkill polybar; polybar main &"
 exec --no-startup-id picom
 exec --no-startup-id nm-applet
+exec --no-startup-id dunst
 exec --no-startup-id @feh@/bin/feh --bg-fill @nixWallpaper@
