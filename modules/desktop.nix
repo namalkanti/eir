@@ -19,6 +19,7 @@ let
   i3Config = builtins.replaceStrings [ "@feh@" "@nixWallpaper@" ] [ "${pkgs.feh}" "${nixWallpaper}" ] (builtins.readFile ../config/i3/config);
   polybarConfig = builtins.readFile ../config/polybar/config.ini;
   rofiConfig = builtins.readFile ../config/rofi/config.rasi;
+  dunstConfig = builtins.readFile ../config/dunst/dunstrc;
 in
 
 {
@@ -101,5 +102,6 @@ in
     "skel/.config/i3/config".text = i3Config;
     "skel/.config/polybar/config.ini".text = polybarConfig;
     "skel/.config/rofi/config.rasi".text = rofiConfig;
+    "skel/.config/dunst/dunstrc".text = dunstConfig;
   };
 }

@@ -10,10 +10,10 @@ configuration {
 @theme "/dev/null"
 
 * {
-    bg: #070f1c;
-    bg-alt: #1e1e2e;
-    fg: #e0d9c7;
-    accent: #ea6847;
+    bg: #1e1e2e;
+    bg-alt: #313244;
+    fg: #cdd6f4;
+    accent: #89b4fa;
 
     background-color: @bg;
     text-color: @fg;
@@ -27,12 +27,14 @@ window {
     width: 30%;
     border: 2;
     border-color: @accent;
+    border-radius: 8px;
     background-color: @bg;
     padding: 10;
 }
 
 element {
     padding: 6 8;
+    border-radius: 4px;
     text-color: @fg;
 }
 
