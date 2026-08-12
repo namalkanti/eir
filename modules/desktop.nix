@@ -20,6 +20,13 @@ let
   polybarConfig = builtins.readFile ../config/polybar/config.ini;
   rofiConfig = builtins.readFile ../config/rofi/config.rasi;
   dunstConfig = builtins.readFile ../config/dunst/dunstrc;
+
+  # Offline Surfingkeys extension CRX package from Chrome Web Store
+  surfingkeysCrx = pkgs.fetchurl {
+    name = "surfingkeys-1.18.0.crx";
+    url = "https://clients2.google.com/service/update2/crx?response=redirect&os=linux&arch=x86-64&os_arch=x86-64&nacl_arch=x86-64&prod=chromecx&prodversion=120.0&acceptformat=crx2,crx3&x=id%3Dgfbliohnnapiefjpjlpjnehglfpaknnc%26uc";
+    sha256 = "0zf6zzyvz9hsd072jvhsgzffa6g4xbhrx838jfq18ixack0xyc91";
+  };
 in
 
 {
@@ -40,16 +47,16 @@ in
 
   # Default browser for xdg-open
   xdg.mime.defaultApplications = {
-    "text/html" = "firefox.desktop";
-    "x-scheme-handler/http" = "firefox.desktop";
-    "x-scheme-handler/https" = "firefox.desktop";
+    "text/html" = "brave-browser.desktop";
+    "x-scheme-handler/http" = "brave-browser.desktop";
+    "x-scheme-handler/https" = "brave-browser.desktop";
   };
 
   # Desktop Utilities & GUI apps
   environment.systemPackages = with pkgs; [
     networkmanagerapplet
     wezterm
-    firefox
+    brave
     lf
     fzf
     ripgrep
@@ -82,7 +89,7 @@ in
     path = with pkgs; [ rsync coreutils ];
     script = ''
       mkdir -p /home/eir
-      rsync -a --ignore-existing /etc/skel/ /home/eir/
+      rsync -aL /etc/skel/ /home/eir/
       chown -R eir:users /home/eir
     '';
   };
@@ -99,9 +106,30 @@ in
     "skel/.claude".source = "${resolvedDotfiles}/.claude";
     "skel/.config/wezterm".source = "${resolvedDotfiles}/wezterm";
     "skel/.config/lf".source = "${resolvedDotfiles}/lf";
+    "skel/.config/surfingkeys".source = "${resolvedDotfiles}/surfingkeys";
     "skel/.config/i3/config".text = i3Config;
     "skel/.config/polybar/config.ini".text = polybarConfig;
     "skel/.config/rofi/config.rasi".text = rofiConfig;
     "skel/.config/dunst/dunstrc".text = dunstConfig;
+
+    # Enterprise Policy to force-install Surfingkeys extension
+    "brave/policies/managed/extensions.json".text = builtins.toJSON {
+      ExtensionSettings = {
+        "gfbliohnnapiefjpjlpjnehglfpaknnc" = {
+          installation_mode = "force_installed";
+          update_url = "https://clients2.google.com/service/update2/crx";
+        };
+      };
+    };
+
+    # Offline external extension definition for Brave and Chromium
+    "brave/extensions/gfbliohnnapiefjpjlpjnehglfpaknnc.json".text = builtins.toJSON {
+      external_crx = "${surfingkeysCrx}";
+      external_version = "1.18.0";
+    };
+    "chromium/extensions/gfbliohnnapiefjpjlpjnehglfpaknnc.json".text = builtins.toJSON {
+      external_crx = "${surfingkeysCrx}";
+      external_version = "1.18.0";
+    };
   };
 }

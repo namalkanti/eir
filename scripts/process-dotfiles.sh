@@ -33,9 +33,18 @@ cp -rL "$dotfiles"/.config/wezterm         "$out"/wezterm
 chmod u+w "$out"/wezterm
 sed -i "s/MesloLGS NF/MesloLGS Nerd Font/g" "$out"/wezterm/wezterm.lua
 cp -rL "$dotfiles"/.config/lf              "$out"/lf
+# Surfingkeys config
+mkdir -p "$out"/surfingkeys
+if [ -d "$dotfiles"/.config/surfingkeys ]; then
+  cp -rL "$dotfiles"/.config/surfingkeys/. "$out"/surfingkeys/
+elif [ -f "$dotfiles"/.surfingkeys.js ]; then
+  cp -rL "$dotfiles"/.surfingkeys.js "$out"/surfingkeys/config.js
+elif [ -f "$dotfiles"/.surfingkeys ]; then
+  cp -rL "$dotfiles"/.surfingkeys "$out"/surfingkeys/config.js
+fi
 
 # Claude — resolve symlinks, inject AGENTS.md, fix CLAUDE.md reference
 cp -rL "$dotfiles"/.claude       "$out"/.claude
-chmod u+w "$out"/.claude
+chmod -R u+w "$out"/.claude
 cp -rL "$dotfiles"/.pi/agent/AGENTS.md "$out"/.claude/AGENTS.md
 echo '@~/.claude/AGENTS.md' > "$out"/.claude/CLAUDE.md
